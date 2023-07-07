@@ -28,9 +28,6 @@ const register = async (req, res) => {
   }
 };
 
-
-const { OAuth2Client } = require('google-auth-library');
-
 const login = async (req, res) => {
   try {
     const MAX_FAILED_ATTEMPTS = 3;
@@ -41,18 +38,6 @@ const login = async (req, res) => {
     const { error } = loginValidation(user);
     if (error)
       return handleError(res, 400, `Joi Error: ${error.details[0].message}`);
-
-    // Verify Google ID token
-    const CLIENT_ID = "1004914812935-jnojqrgh25lo6shf057vraebc368nokl.apps.googleusercontent.com"
-    const client = new OAuth2Client(CLIENT_ID);
-    const ticket = await client.verifyIdToken({
-      idToken,
-      audience: CLIENT_ID,
-    });
-    const { email: googleEmail } = ticket.getPayload();
-    if (email !== googleEmail) {
-      throw new Error("Authentication Error: Invalid email or password");
-    }
 
     const userInDb = await User.findOne({ email });
     if (!userInDb)
